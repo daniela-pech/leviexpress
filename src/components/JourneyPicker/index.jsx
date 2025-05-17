@@ -1,6 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import './style.css';
 
+const CityOptions = ({ cities }) => {
+  return (
+    <>
+      <option value="">Vyberte:</option>
+      {cities.map((city) => (
+        <option key={city.code} value={city.code}>
+          {city.name}
+        </option>
+      ))}
+    </>
+  );
+};
+
+const DatesOptions = ({ dates }) => {
+  return (
+    <>
+      <option value="">Vyberte:</option>
+      {dates.map((date) => (
+        <option key={date.dateBasic} value={date.dateBasic}>
+          {date.dateCs}
+        </option>
+      ))}
+    </>
+  );
+};
+
 export const JourneyPicker = ({ onJourneyChange }) => {
   const [fromCity, setFromCity] = useState('');
   const [toCity, setToCity] = useState('');
@@ -28,19 +54,19 @@ export const JourneyPicker = ({ onJourneyChange }) => {
     fetchCity();
     fetchDate();
   }, []);
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('Odesílám formulář s cestou');
-    console.log(fromCity);
-    console.log(toCity);
-    console.log(date);
+    const adresa = `https://apps.kodim.cz/daweb/leviexpress/api/journey?fromCity=${fromCity}&toCity=${toCity}&date=${date}`;
+    const response = await fetch(adresa);
+    const responseData = await response.json();
+    onJourneyChange(responseData.results);
   };
 
   return (
     <div className="journey-picker container">
       <h2 className="journey-picker__head">Kam chcete jet?</h2>
       <div className="journey-picker__body">
-        <form className="journey-picker__form">
+        <form className="journey-picker__form" onSubmit={handleSubmit}>
           <label>
             <div className="journey-picker__label">Odkud:</div>
             <select
@@ -66,7 +92,7 @@ export const JourneyPicker = ({ onJourneyChange }) => {
             <button
               className="btn"
               type="submit"
-              onClick={() => handleSubmit(event)}
+              disabled={!fromCity || !toCity || !date}
             >
               Vyhledat spoj
             </button>
@@ -75,31 +101,5 @@ export const JourneyPicker = ({ onJourneyChange }) => {
         <img className="journey-picker__map" src="/map.svg" />
       </div>
     </div>
-  );
-};
-
-const CityOptions = ({ cities }) => {
-  return (
-    <>
-      <option value="">Vyberte:</option>
-      {cities.map((city) => (
-        <option key={city.code} value={city.code}>
-          {city.name}
-        </option>
-      ))}
-    </>
-  );
-};
-
-const DatesOptions = ({ dates }) => {
-  return (
-    <>
-      <option value="">Vyberte:</option>
-      {dates.map((date) => (
-        <option key={date.dateBasic} value={date.dateBasic}>
-          {date.dateCs}
-        </option>
-      ))}
-    </>
   );
 };
